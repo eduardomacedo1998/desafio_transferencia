@@ -1,66 +1,155 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Desafio Laravel: Gerenciamento de Estoque Distribuído e Transferências
+Contexto/História
+A empresa de logística "QuickShip" está crescendo rapidamente e opera com múltiplos armazéns espalhados pela cidade. Eles enfrentam problemas sérios na gestão do estoque, especialmente quando precisam mover grandes volumes de produtos de um armazém para outro.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Você foi contratado para construir um módulo de backend no Laravel que gerencie a transferência de itens entre armazéns, garantindo que a quantidade de estoque seja debitada corretamente na origem e creditada no destino, tudo isso de forma segura e transacional.
 
-## About Laravel
+O sistema deve expor um endpoint de API que gerencie essa movimentação.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Requisitos Técnicos
+Você deve utilizar o framework Laravel (versão 8 ou superior) e o banco de dados de sua preferência (SQLite, MySQL, etc.).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Estrutura de Modelos e Migrações
+Crie os modelos e as migrações necessárias para representar as seguintes entidades e suas relações:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+•
+**`Warehouse` (Armazém):**
 
-## Learning Laravel
+•
+`id`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+•
+`name` (string)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+•
+**`Product` (Produto):**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+•
+`id`
 
-## Laravel Sponsors
+•
+`name` (string)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+•
+`sku` (string, unique)
 
-### Premium Partners
+•
+**`Inventory` (Estoque):** Esta deve ser a tabela pivô que liga Produtos a Armazéns, rastreando a quantidade.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+•
+`warehouse_id` (foreign key)
 
-## Contributing
+•
+`product_id` (foreign key)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+•
+`quantity` (integer, default 0)
 
-## Code of Conduct
+•
+*Nota:* Use uma chave composta (`warehouse_id`, `product_id`) para garantir unicidade.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+•
+**`Transfer` (Transferência):** Registra o histórico da movimentação.
 
-## Security Vulnerabilities
+•
+`id`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+•
+`product_id`
 
-## License
+•
+`source_warehouse_id`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+•
+`destination_warehouse_id`
+
+•
+`quantity` (integer)
+
+•
+`user_id` (opcional, mas recomendado para auditoria)
+
+•
+`status` (e.g., 'completed', 'failed')
+
+2. Lógica de Negócio: O Serviço de Transferência
+Crie um serviço (ou lógica dentro do Controller) que execute a operação de transferência de estoque. Este processo deve ser atômico (ou seja, se falhar em qualquer etapa, deve reverter tudo).
+
+3. Endpoint da API
+Crie uma rota de API que aceite requisições `POST` para iniciar uma transferência de estoque.
+
+#### Rota Exemplo:
+
+code snippet
+// routes/api.php
+Route::post('/inventory/transfer', [InventoryController::class, 'transfer']);
+#### Estrutura da Requisição (JSON):
+
+code snippet
+{
+    "product_id": 15,
+    "source_warehouse_id": 1,
+    "destination_warehouse_id": 2,
+    "quantity": 50
+}
+4. Implementação Segura
+A lógica de transferência deve utilizar o mecanismo de transações do banco de dados do Laravel para garantir integridade.
+
+code snippet
+// Exemplo de uso de transação
+DB::transaction(function () use ($data) {
+    // 1. Validar e buscar estoque
+    // 2. Decrementar na origem
+    // 3. Incrementar no destino
+    // 4. Registrar a Transferência
+});
+Critérios de Aceitação
+Para que o desafio seja considerado completo, todos os critérios abaixo devem ser atendidos:
+
+1. Validação Completa: A requisição deve ser validada rigorosamente (Form Request é incentivado).
+
+•
+Todos os IDs de armazém e produto devem existir.
+
+•
+A `quantity` deve ser um número inteiro positivo maior que zero.
+
+•
+O armazém de origem e o de destino não podem ser o mesmo.
+
+2. Disponibilidade de Estoque (Validação Crítica): A transferência só pode ocorrer se o `source_warehouse_id` tiver estoque suficiente do `product_id` para cobrir a `quantity` solicitada. Se não houver, a transferência deve falhar com um código HTTP 400 (Bad Request) e uma mensagem clara.
+
+3. Atomicidade: A lógica de débito e crédito de estoque deve ser envolvida em uma transação de banco de dados (`DB::transaction`). Se o crédito no destino falhar, o débito na origem deve ser revertido.
+
+4. Atualização de Estoque: Após a transferência bem-sucedida, a tabela `Inventory` deve refletir:
+
+•
+Decremento da `quantity` no armazém de origem.
+
+•
+Incremento da `quantity` no armazém de destino.
+
+5. Registro de Transferência: A tabela `Transfer` deve registrar o sucesso da operação.
+
+6. Respostas da API: Retornar respostas JSON adequadas:
+
+•
+Sucesso: HTTP 201 (Created) ou 200 (OK) com detalhes da transferência.
+
+•
+Falha (Validação): HTTP 422 (Unprocessable Entity).
+
+•
+Falha (Estoque Insuficiente): HTTP 400 (Bad Request).
+
+Bônus Opcional: Auditoria e Assincronicidade
+Se você completou os requisitos principais, implemente o seguinte para demonstrar um conhecimento mais aprofundado do ecossistema Laravel:
+
+Bônus 1: Eventos e Listeners
+Em vez de registrar o histórico na tabela `Transfer` diretamente dentro da transação, dispare um Evento (ex: `StockTransferred`) após o sucesso da transação. Crie um Listener para este evento que seja responsável exclusivamente por persistir o registro na tabela `Transfer`.
+
+Bônus 2: Locks Otimistas (Concurrency Control)
+Para lidar com possíveis cenários de concorrência onde dois usuários tentam transferir o mesmo item do mesmo armazém simultaneamente, utilize *locks* (bloqueios) do Eloquent ou do Database para garantir que a verificação de estoque e a atualização ocorram de forma segura.
+
+•
+**Dica:** Considere usar `lockForUpdate()` no Eloquent ao buscar o registro de inventário de origem dentro da transação.
