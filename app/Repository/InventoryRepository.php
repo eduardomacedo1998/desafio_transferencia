@@ -27,4 +27,14 @@ class InventoryRepository {
         return false;
     }
 
+    public function createInventory($warehouseId, $productId, $quantity) {
+        return $this->inventoryModel->create([
+            'warehouse_id' => $warehouseId,
+            'product_id' => $productId,
+            'quantity' => $quantity,
+        ]);
+    }
+
+    
+
 }
