@@ -1,12 +1,14 @@
 <?php
 
-use App\Models\WareHouse;
+namespace App\Repository;
+
+use App\Models\Warehouse;
 
 class WareHouseRepository {
 
     protected $wareHouseModel;
 
-    public function __construct(WareHouse $wareHouseModel) {
+    public function __construct(Warehouse $wareHouseModel) {
         $this->wareHouseModel = $wareHouseModel;
     }
 
@@ -33,5 +35,9 @@ class WareHouseRepository {
             return $wareHouse->delete();
         }
         return false;
+    }
+
+    public function getAllWarehouses() {
+        return $this->wareHouseModel->all();
     }
 }

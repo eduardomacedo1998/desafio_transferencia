@@ -1,5 +1,8 @@
 <?php
 
+namespace App\Repository;
+
+
 use App\Models\Product;
 
 
@@ -35,5 +38,9 @@ class ProductRepository {
             return $product->delete();
         }
         return false;
+    }
+
+    public function getAllProducts() {
+        return $this->productModel->all();
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Repository;
+
 use App\Models\User;
 
 
@@ -34,5 +36,9 @@ class UserRepository {
             return $user->delete();
         }
         return false;
+    }
+
+    public function getAllUsers() {
+        return $this->userModel->all();
     }
 }

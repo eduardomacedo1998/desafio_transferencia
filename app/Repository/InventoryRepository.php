@@ -1,6 +1,9 @@
 <?php
 
+namespace App\Repository;
+
 use App\Models\Inventory;
+
 
 
 class InventoryRepository {
@@ -35,6 +38,29 @@ class InventoryRepository {
         ]);
     }
 
-    
+    public function getInventoryById($id) {
+        return $this->inventoryModel->find($id);
+    }
+
+    public function updateInventoryById($id, $data) {
+        $inventory = $this->getInventoryById($id);
+        if ($inventory) {
+            $inventory->update($data);
+            return $inventory;
+        }
+        return null;
+    }
+
+    public function deleteInventory($id) {
+        $inventory = $this->getInventoryById($id);
+        if ($inventory) {
+            return $inventory->delete();
+        }
+        return false;
+    }
+
+    public function getAllInventories() {
+        return $this->inventoryModel->all();
+    }
 
 }

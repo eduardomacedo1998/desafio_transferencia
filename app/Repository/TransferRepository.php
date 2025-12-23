@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Repository;
+
 use App\Models\Transfer;
 
 class TransferRepository {
@@ -33,5 +35,9 @@ class TransferRepository {
             return $transfer->delete();
         }
         return false;
+    }
+
+    public function getAllTransfers() {
+        return $this->transferModel->all();
     }
 }   
