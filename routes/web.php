@@ -16,3 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::resource('products', App\Http\Controllers\ProductWebController::class);
+Route::resource('warehouses', App\Http\Controllers\WarehouseWebController::class);
+Route::resource('inventories', App\Http\Controllers\InventoryWebController::class);
+Route::resource('transfers', App\Http\Controllers\TransferWebController::class);
+Route::resource('users', App\Http\Controllers\UserWebController::class);
+Route::post('/inventory/transfer', [App\Http\Controllers\TransferController::class, 'transfer']);

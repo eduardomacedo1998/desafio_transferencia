@@ -22,18 +22,18 @@ class Inventory extends Model
     protected $fillable = ['warehouse_id', 'product_id', 'quantity'];
 
     /**
-     * Chave primária composta, pois cada combinação de warehouse e product é única.
+     * Chave primária é o campo 'id' auto-increment.
      *
-     * @var array
+     * @var string
      */
-    protected $primaryKey = ['warehouse_id', 'product_id'];
+    protected $primaryKey = 'id';
 
     /**
-     * Desabilita o auto-incremento, já que a chave primária não é um único campo numérico.
+     * Habilita o auto-incremento.
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * Relacionamento: Um inventário pertence a um armazém.

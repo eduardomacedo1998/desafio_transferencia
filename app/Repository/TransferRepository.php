@@ -38,6 +38,6 @@ class TransferRepository {
     }
 
     public function getAllTransfers() {
-        return $this->transferModel->all();
+        return $this->transferModel->with(['product', 'sourceWarehouse', 'destinationWarehouse', 'user'])->get();
     }
 }   

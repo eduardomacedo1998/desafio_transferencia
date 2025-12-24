@@ -31,11 +31,10 @@ class InventoryRepository {
     }
 
     public function createInventory($warehouseId, $productId, $quantity) {
-        return $this->inventoryModel->create([
-            'warehouse_id' => $warehouseId,
-            'product_id' => $productId,
-            'quantity' => $quantity,
-        ]);
+        return $this->inventoryModel->updateOrCreate(
+            ['warehouse_id' => $warehouseId, 'product_id' => $productId],
+            ['quantity' => $quantity]
+        );
     }
 
     public function getInventoryById($id) {
@@ -60,7 +59,7 @@ class InventoryRepository {
     }
 
     public function getAllInventories() {
-        return $this->inventoryModel->all();
+        return $this->inventoryModel->with(['product', 'warehouse'])->get();
     }
 
 }
