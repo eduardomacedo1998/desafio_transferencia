@@ -59,6 +59,8 @@ class TransferController extends Controller
         return response()->json($transfer);
     }
 
+    
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -73,7 +75,15 @@ class TransferController extends Controller
         
          try {
             $verificarstoque = $this->stockTransferService->transfer($data);
-        return response()->json($verificarstoque, 201);
+
+            $mensagemstatus = [
+                'pending' => 'Pendente',
+                'completed' => 'Concluído',
+                'canceled' => 'Cancelado',
+            ];   
+        
+            // Redirecionar com mensagem de sucesso incluindo o status da transferência
+        return redirect()->route('transfers.index')->with('success', 'Transferência criada com sucesso! Status: ' . $mensagemstatus);
 
          } catch (\Exception $e) 
          {

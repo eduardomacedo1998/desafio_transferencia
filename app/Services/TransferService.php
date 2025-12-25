@@ -31,4 +31,14 @@ class TransferService {
     public function getAllTransfers() {
         return $this->transferRepository->getAllTransfers();
     }
+       
+    public function getStatusMessage($status) {
+        $statusMessages = [
+            'pending' => 'Pendente',
+            'completed' => 'Concluído',
+            'canceled' => 'Cancelado',
+        ];
+
+        return $statusMessages[$status] ?? 'Desconhecido';
+    }
 }

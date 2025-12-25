@@ -64,5 +64,16 @@ class Transfer extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getStatusMessage($status)
+    {
+        $mensages = [
+            'pending' => 'Pendente',
+            'completed' => 'Concluído',
+            'canceled' => 'Cancelado',
+        ];
+
+        return $mensages[$this->status] ?? $this->status;
+    }
 }
 

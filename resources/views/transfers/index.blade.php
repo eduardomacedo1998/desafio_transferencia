@@ -6,13 +6,11 @@
 <h1>Transferências</h1>
 <a href="{{ route('transfers.create') }}" class="btn btn-primary mb-3">Nova Transferência</a>
 
-<table class="table table-striped">
-
 @if (session('error'))
     <div class="alert alert-danger">   
         {{ session('error') }}
     </div>
-@endif 
+@endif
 
 @if (session('success'))
     <div class="alert alert-success">
@@ -20,8 +18,7 @@
     </div>
 @endif
 
-<thead>
-
+<table class="table table-striped">
     <thead>
         <tr>
             <th>ID</th>
@@ -30,6 +27,7 @@
             <th>Destino</th>
             <th>Quantidade</th>
             <th>Status</th>
+            <th>Mensagem</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -41,7 +39,24 @@
             <td>{{ $transfer->sourceWarehouse ? $transfer->sourceWarehouse->name : 'Armazém não encontrado' }}</td>
             <td>{{ $transfer->destinationWarehouse ? $transfer->destinationWarehouse->name : 'Armazém não encontrado' }}</td>
             <td>{{ $transfer->quantity }}</td>
-            <td>{{ $transfer->status }}</td>
+            <td>
+                @if($transfer->status === 'pending')
+                    <span class="badge bg-warning">{{ ucfirst($transfer->status) }}</span>
+                @elseif($transfer->status === 'completed')
+                    <span class="badge bg-success">{{ ucfirst($transfer->status) }}</span>
+                @else
+                    <span class="badge bg-danger">{{ ucfirst($transfer->status) }}</span>
+                @endif
+            </td>
+            <td>
+                @if($transfer->status === 'pending')
+                    <small class="text-warning">⏳ Aguardando conclusão...</small>
+                @elseif($transfer->status === 'completed')
+                    <small class="text-success">✅ Concluída com sucesso!</small>
+                @else
+                    <small class="text-danger">❌ Cancelada</small>
+                @endif
+            </td>
             <td>
                 <a href="{{ route('transfers.show', $transfer) }}" class="btn btn-sm btn-info">Ver</a>
                 <a href="{{ route('transfers.edit', $transfer) }}" class="btn btn-sm btn-warning">Editar</a>

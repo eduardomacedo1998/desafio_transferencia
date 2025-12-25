@@ -32,47 +32,45 @@ class StockTransferService
                     throw new Exception('O armazém de origem não pode ser igual ao de destino.');
                 }
 
-                // 2. Buscar e BLOQUEAR inventário de origem (lock pessimista)
-                $sourceInventory = Inventory::where('warehouse_id', $data['source_warehouse_id'])
-                    ->where('product_id', $data['product_id'])
-                    ->lockForUpdate()
-                    ->first();
+                // Apenas atualizar estoque se status for 'completed'
+                if (($data['status'] ?? 'pending') === 'completed') {
+                    // 2. Buscar e BLOQUEAR inventário de origem
+                    $sourceInventory = Inventory::where('warehouse_id', $data['source_warehouse_id'])
+                        ->where('product_id', $data['product_id'])
+                        ->lockForUpdate()
+                        ->first();
 
-                // 3. Validar existência do inventário de origem
-                if (!$sourceInventory) {
-                    throw new Exception('Inventário de origem não encontrado.');
+                    if (!$sourceInventory) {
+                        throw new Exception('Inventário de origem não encontrado.');
+                    }
+
+                    if ($sourceInventory->quantity < $data['quantity']) {
+                        throw new Exception('Estoque insuficiente no armazém de origem. Disponível: ' . $sourceInventory->quantity);
+                    }
+
+                    $destinationInventory = Inventory::firstOrCreate(
+                        [
+                            'warehouse_id' => $data['destination_warehouse_id'],
+                            'product_id' => $data['product_id']
+                        ],
+                        ['quantity' => 0]
+                    );
+
+                    $sourceInventory->quantity -= $data['quantity'];
+                    $sourceInventory->save();
+
+                    $destinationInventory->quantity += $data['quantity'];
+                    $destinationInventory->save();
                 }
 
-                // 4. Validar estoque suficiente
-                if ($sourceInventory->quantity < $data['quantity']) {
-                    throw new Exception('Estoque insuficiente no armazém de origem. Disponível: ' . $sourceInventory->quantity);
-                }
-
-                // 5. Buscar ou criar inventário de destino
-                $destinationInventory = Inventory::firstOrCreate(
-                    [
-                        'warehouse_id' => $data['destination_warehouse_id'],
-                        'product_id' => $data['product_id']
-                    ],
-                    ['quantity' => 0]
-                );
-
-                // 6. DECREMENTAR estoque na origem
-                $sourceInventory->quantity -= $data['quantity'];
-                $sourceInventory->save();
-
-                // 7. INCREMENTAR estoque no destino
-                $destinationInventory->quantity += $data['quantity'];
-                $destinationInventory->save();
-
-                // 8. Registrar a transferência
+                // 3. Registrar a transferência
                 $transfer = Transfer::create([
                     'product_id' => $data['product_id'],
                     'source_warehouse_id' => $data['source_warehouse_id'],
                     'destination_warehouse_id' => $data['destination_warehouse_id'],
                     'quantity' => $data['quantity'],
                     'user_id' => $data['user_id'] ?? null,
-                    'status' => 'completed'
+                    'status' => $data['status'] ?? 'pending'
                 ]);
 
                 return $transfer;
