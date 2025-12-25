@@ -70,8 +70,15 @@ class TransferController extends Controller
             'status' => 'required|string',
         ]);
 
-        $transfer = $this->transferService->createTransfer($data);
-        return response()->json($transfer, 201);
+        
+         try {
+            $verificarstoque = $this->stockTransferService->transfer($data);
+        return response()->json($verificarstoque, 201);
+
+         } catch (\Exception $e) 
+         {
+            return response()->json(['message' => $e->getMessage()], 400);}
+        
     }
 
     public function update(Request $request, $id)
