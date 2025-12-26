@@ -84,7 +84,27 @@ class TransferWebController extends Controller
         if (!$transfer) {
             abort(404);
         }
-        return redirect()->route('transfers.index')->with('success', 'Transferência atualizada com sucesso!');
+      
+        try {
+            // Se o status for alterado para 'completed', atualizar os estoques
+            if ($data['status'] === 'completed') {
+                $this->stockTransferService->transfer([
+                    'product_id' => $transfer->product_id,
+                    'source_warehouse_id' => $transfer->source_warehouse_id,
+                    'destination_warehouse_id' => $transfer->destination_warehouse_id,
+                    'quantity' => $transfer->quantity,
+                    'user_id' => $transfer->user_id,
+                    'status' => 'completed'
+                ]);
+
+                 return redirect()->route('transfers.index')->with('success', 'Transferência atualizada com sucesso!');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+
+       
     }
 
     public function destroy($id)
